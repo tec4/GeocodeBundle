@@ -1,3 +1,10 @@
+Summary
+=======
+This bundle provides a wrapper around the 
+[BazingaGeocoderBundle](https://github.com/geocoder-php/BazingaGeocoderBundle).
+It provides a simple way to implement latitude/longitude coordinates in to your
+doctrine models.
+
 Installation
 ============
 
@@ -42,3 +49,6 @@ class AppKernel extends Kernel
     // ...
 }
 ```
+
+Usage
+====
