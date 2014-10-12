@@ -1,6 +1,6 @@
 <?php
 
-namespace Tec4\GeocodeBundle\Model\Interfaces;
+namespace Tec4\GeocodeBundle\Model;
 
 /**
  * Implement if entities can be geocoded

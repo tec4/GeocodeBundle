@@ -18,7 +18,7 @@ class GeocodeCommand extends ContainerAwareCommand
     {
         $this->setName('tec4:geocode')
             ->setDescription(
-                'Geocode any model implementing \\Tec4\\GeocodeBundle\\Model\\Interfaces\\GeocodeableInterface'
+                'Geocode any model implementing \\Tec4\\GeocodeBundle\\Model\\GeocodeableInterface'
             )
             ->addArgument(
                 'class', 
@@ -59,7 +59,7 @@ class GeocodeCommand extends ContainerAwareCommand
         $em = $container->get('doctrine')->getManager($emName); 
 
         $refClass = new \ReflectionClass($class);
-        $interface = '\\Tec4\\GeocodeBundle\\Model\\Interfaces\\GeocodeableInterface';
+        $interface = '\\Tec4\\GeocodeBundle\\Model\\GeocodeableInterface';
 
         // If not of interface, throw exception
         if (false === $refClass->implementsInterface($interface)) {

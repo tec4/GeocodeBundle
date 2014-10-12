@@ -1,6 +1,6 @@
 <?php
 
-namespace Tec4\GeocodeBundle\Model\Traits;
+namespace Tec4\GeocodeBundle\Model;
 
 use Doctrine\ORM\Mapping as ORM;
 
