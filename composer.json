@@ -1,0 +1,22 @@
+{
+    "name" : "tec4/geocode-bundle",
+    "description" : "Symfony2 geocoding bundle",
+    "type" : "symfony-bundle",
+    "authors" : [{
+        "name" : "Eric Watts"
+    }],
+    "keywords" : [
+        "symfony2 geocode"
+    ],
+    "require" : {
+      "php": ">=5.3.0",
+      "willdurand/geocoder-bundle": "@stable",
+      "symfony/symfony": "2.*"
+    },
+    "autoload" : {
+        "psr-0" : {
+            "Tec4\\GeocodeBundle" : ""
+        }
+    },
+    "target-dir" : "Tec4/GeocodeBundle"
+}
