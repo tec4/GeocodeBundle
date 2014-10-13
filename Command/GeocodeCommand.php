@@ -33,18 +33,17 @@ class GeocodeCommand extends ContainerAwareCommand
                 'default'
             )
             ->addOption(
-                'geocoder', 
-                null,
-                InputOption::VALUE_REQUIRED, 
-                'Name of willdurand/geocoder-bundle geocoder to use. See willdurand/geocoder-bundle docs for available types.',
-                'google_maps'
-            )
-            ->addOption(
                 'limit', 
                 null,
                 InputOption::VALUE_REQUIRED, 
                 'Set number of entities to geocode.',
                 5
+            )
+            ->addOption(
+                'geocode_provider', 
+                null,
+                InputOption::VALUE_OPTIONAL, 
+                'Name of willdurand/geocoder-bundle geocoder to use. See willdurand/geocoder-bundle docs for available types.'
             )
         ;
     }
@@ -54,7 +53,6 @@ class GeocodeCommand extends ContainerAwareCommand
         $container = $this->getContainer();
         $class = $input->getArgument('class');
         $limit = $input->getOption('limit');
-        $geocoder = $input->getOption('geocoder');
         $emName = $input->getOption('em');
         $em = $container->get('doctrine')->getManager($emName); 
 
@@ -68,36 +66,25 @@ class GeocodeCommand extends ContainerAwareCommand
 
         $entities = $em->getRepository($class)->findBy(
             array('geocoded' => false),
-            $order_by = null,
+            $orderBy = null,
             $limit
         );
 
-        $geocoder = $container->get('bazinga_geocoder.geocoder')
-            ->using($geocoder)
-        ;
+        $geocoder = $container->get('bazinga_geocoder.geocoder');
+        if ($input->getOption('geocode_provider')) {
+            $geocoder->using($input->getOption('geocode_provider'));
+        }
 
         $output->writeln('Begining geocode');
+        $modelGeocoder = $container->get('tec4_geocode.model_geocoder');
 
         $i = 0;
         foreach ($entities as $entity) {
-            $name = $entity->getGeocodeableName();
-            $result = $geocoder->geocode($name);
-            if ($result) {
-                $lat = $result->getLatitude();
-                $lng = $result->getLongitude();
-
-                // Set coordinates if found.
-                if ($lat !== 0 && $lng !== 0) {
-                    $i++;
-                    $entity->setCoordinates($lat, $lng);
-                    $output->writeln('<info>Geocoded: ' . $name . '</info>');
-                    $output->writeln('<comment>Latitude: ' . $lat . '</comment>');
-                    $output->writeln('<comment>Longitude: ' . $lng . '</comment>');
-
-                    $em->persist($entity);
-                    if (($i % 30) == 0) {
-                        $em->flush();
-                    }
+            if ($modelGeocoder->addCoordinates($entity, $geocoder, true)) {
+                $i++;
+                $em->persist($entity);
+                if (($i % 30) == 0) {
+                    $em->flush();
                 }
             }
             // Hitting API too fast causes errors with many geocoding services
