@@ -80,7 +80,7 @@ class GeocodeCommand extends ContainerAwareCommand
 
         $i = 0;
         foreach ($entities as $entity) {
-            if ($modelGeocoder->addCoordinates($entity, $geocoder, true)) {
+            if ($modelGeocoder->updateModel($entity, $geocoder, true)) {
                 $i++;
                 $em->persist($entity);
                 if (($i % 30) == 0) {

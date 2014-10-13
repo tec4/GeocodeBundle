@@ -3,6 +3,7 @@
 namespace Tec4\GeocodeBundle\Service;
 
 use Geocoder\Geocoder;
+use Geocoder\Result\ResultInterface;
 use Monolog\Logger;
 use Tec4\GeocodeBundle\Model\GeocodeableInterface;
 
@@ -29,15 +30,48 @@ class ModelGeocoder
      * @param  Geocoder             $geocoder
      * @param  boolean              $removeGeocodingOnFail Remove previous geocoded values, if set
      * @return boolean
+     * @throws \Exception           Re-throws parent exception as defined by geocoding service
      */
-    public function addCoordinates(
+    public function updateModel(
         GeocodeableInterface $model, 
         Geocoder $geocoder, 
         $removeGeocodingOnFail = false
     ) {
         $name = $model->getGeocodeableName();
-        $result = $geocoder->geocode($name);
-        if ($result) {
+        $result = null;
+
+        // Attempt to get results. If exception, log and
+        // rethrow it so it can be caught down the chain,
+        // in the calling code
+        try {
+            $result = $geocoder->geocode($name);
+        } catch (\Exception $e) {
+            $this->logger->error(
+                $this->buildBaseErrorMessage($name) .
+                'Exception thrown: ' . $e->getMessage()
+            );
+            throw $e;
+        }
+        $success = $this->addCoordinates($model, $result);
+
+        if (true === $removeGeocodingOnFail) {
+            $model->setCoordinates(null, null);
+            $model->setGeocoded(false);
+        }
+
+        return $success;
+    }
+
+    /**
+     * Apply geocoded coordinates (latitude/longitude) to model
+     *
+     * @param  GeocodeableInterface $model
+     * @param  ResultInterface|null $result
+     * @return boolean
+     */
+    private function addCoordinates(GeocodeableInterface $model, ResultInterface $result = null)
+    {
+        if ($result instanceof ResultInterface) {
             $lat = $result->getLatitude();
             $lng = $result->getLongitude();
 
@@ -59,11 +93,6 @@ class ModelGeocoder
             $this->logger->info(
                 $this->buildBaseErrorMessage($name) . 'No result found from provider'
             );
-        }
-
-        if (true === $removeGeocodingOnFail) {
-            $model->setCoordinates(null, null);
-            $model->setGeocoded(false);
         }
 
         return false;
