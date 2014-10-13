@@ -51,4 +51,9 @@ class AppKernel extends Kernel
 ```
 
 Usage
+=====
+
+TODO
 ====
+1. Add better logging
+2. Add service to geocode single entity at a time
