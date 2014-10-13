@@ -93,7 +93,7 @@ class ModelGeocoder
                 );
             }
         } else {
-            $this->logger->info(
+            $this->logger->error(
                 $this->buildBaseErrorMessage($name) . 'No result found from provider'
             );
         }
