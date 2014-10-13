@@ -71,6 +71,7 @@ use Tec4\GeocodeBundle\Model\GeocodeableInterface;
 use Tec4\GeocodeBundle\Model\GeocodeableTraits;
 
 class NewClass implements GeocodeableInterface
+{
     /**
      * Include properties and accessors for geocoding
      */
