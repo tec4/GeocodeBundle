@@ -54,7 +54,9 @@ class ModelGeocoder
         }
         $success = $this->addCoordinates($model, $result);
 
-        if (true === $removeGeocodingOnFail) {
+        // Un-geocode if unsuccessful and indicated to remove
+        // previous geocoded values
+        if (!$success && true === $removeGeocodingOnFail) {
             $model->setCoordinates(null, null);
             $model->setGeocoded(false);
         }
