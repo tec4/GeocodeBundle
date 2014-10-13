@@ -59,4 +59,3 @@ Usage
 TODO
 ====
 1. Add better logging (ability to extend logger and implement own solution/channel to log to, etc)
-2. Add service to geocode single entity at a time
