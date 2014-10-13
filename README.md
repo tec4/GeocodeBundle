@@ -50,8 +50,50 @@ class AppKernel extends Kernel
 }
 ```
 
+Step 3: Implement interface on Model
+------------------------------------
+
+Add interface to your model (entity/document).
+
+User helper traits if you desire to get most of the required properties and attriubtes for interface.
+
+Must implement new method called getGeocodeableName in code
+
+```php
+<?php
+
+namespace Acme\SomeBundle\Model;
+
+use Tec4\GeocodeBundle\Model\GeocodeableInterface;
+use Tec4\GeocodeBundle\Model\GeocodeableTraits;
+
+class NewClass implements GeocodeableInterface
+    /**
+     * Include properties and accessors for geocoding
+     */
+    use GeocodeableTraits;
+    
+    // ...
+    private $address;
+        
+    // ...
+    
+    /**
+     * {@inheridoc}
+     */
+    public function getGeocodeableName()
+    {
+        // Return some geocodeable, perhaps something like: $this->getAddress();
+        // Example location would be: 1234 Some Street #1, Some City, Some State
+        // Can be any geocodeable location
+        return $this->address;
+    }
+}
+```
+
 Usage
 =====
+
 // @TODO
 // Give example of auto-updating via doctrine event subscriber
 // Give example of leveraging interface in class
