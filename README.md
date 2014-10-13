@@ -58,7 +58,7 @@ Step 3: Implement interface on Model
 
 Add interface to your model (entity/document).
 
-User helper traits if you desire to get most of the required properties and attriubtes for interface.
+Use pre-created traits if you desire to get most of the required properties and attriubtes for interface.
 
 Must implement new method called getGeocodeableName in code
 
