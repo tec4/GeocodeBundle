@@ -50,6 +50,9 @@ class AppKernel extends Kernel
 }
 ```
 
+Also install [BazingaGeocoderBundle](https://github.com/geocoder-php/BazingaGeocoderBundle) per
+their documentation.
+
 Step 3: Implement interface on Model
 ------------------------------------
 
@@ -94,9 +97,126 @@ class NewClass implements GeocodeableInterface
 Usage
 =====
 
-// @TODO
-// Give example of auto-updating via doctrine event subscriber
-// Give example of leveraging interface in class
+Auto-update entities when certain fields change (ex: when an address changes)
+-----------------------------------------------------------------------------
+
+For more info read symfony's docs about [registering event listeners and subscribers](http://symfony.com/doc/current/cookbook/doctrine/event_listeners_subscribers.html)
+
+```php
+<?php
+
+namespace Acme\SomeBundle\EventListener;
+
+use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\Event\LifecycleEventArgs;
+use Bazinga\Bundle\GeocoderBundle\Geocoder\LoggableGeocoder;
+use Tec4\GeocodeBundle\Model\GeocodeableInterface;
+use Tec4\GeocodeBundle\Service\ModelGeocoder;
+
+/**
+ * Hook into Doctrine prePersist & preUpdate events
+ * to update geocode specific fields if information
+ * about an entity's location has changed.
+ */
+class GeocodeEntitySubscriber implements EventSubscriber
+{ 
+    /** @var LoggableGeocoder $geocoder */
+    private $geocoder;
+
+    /** @var ModelGeocoder $modelGeocoder */
+    private $modelGeocoder;
+
+    /**
+     * @param LoggableGeocoder $geocoder
+     * @param ModelGeocoder    $modelGeocoder
+     */
+    public function __construct(LoggableGeocoder $geocoder, ModelGeocoder $modelGeocoder)
+    {
+        $this->geocoder = $geocoder;
+        $this->modelGeocoder = $modelGeocoder;
+    }
+
+    public function getSubscribedEvents()
+    {
+        return array(
+            'prePersist',
+            'preUpdate',
+        );
+    }
+
+    /**
+     * Geocode entity if it has not already been done
+     *
+     * @param LifecycleEventArgs $args
+     */
+    public function prePersist(LifecycleEventArgs $args)
+    {
+        if (($entity = $args->getEntity()) instanceof GeocodeableInterface) {
+            if (!$entity->isGeocoded()) {
+                $this->geocode($entity);
+            }
+        }
+    }
+
+    /**
+     * Geocode entity if has yet to be done or if location has changed
+     *
+     * @param LifecycleEventArgs $args
+     */
+    public function preUpdate(LifecycleEventArgs $args)
+    {
+        if (($entity = $args->getEntity()) instanceof GeocodeableInterface) {
+            if (!$entity->isGeocoded() || $args->hasChangedField('address')) {
+                $this->geocode($entity);
+
+                // Need to recompute changeset to update correctly
+                $em = $args->getEntityManager();
+                $uow = $em->getUnitOfWork();
+                $meta = $em->getClassMetadata(get_class($entity));
+                $uow->recomputeSingleEntityChangeSet($meta, $entity);
+            }
+        }
+    }
+
+    /**
+     * Handle geocoding of entity
+     *
+     * @param GeocodeableInterface $entity
+     */
+    public function geocode(GeocodeableInterface $entity)
+    {
+        try {
+            $this->modelGeocoder->updateModel($entity, $this->geocoder, true);
+        } catch (\Exception $e) {
+            // Perhaps do something here
+            // Add message to flash bag?
+        }
+    }
+}
+```
+
+Configure service:
+
+```yaml
+# src/Acme/SomeBundle/Resources/config/services.yml
+services:
+    acme.listener.geocode_entities:
+        class: Acme\SomeBundle\EventListener\GeocodeEntitySubscriber
+        arguments:
+            - @bazinga_geocoder.geocoder
+            - @tec4_geocode.model_geocoder
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+```
+
+Batch update via command
+------------------------
+
+All options, except the arguemnt are optional. The class name, however, is required. 
+
+```
+php app/console tec4:geocode "Acme\\SomeBundle\\Model\\ClasName" --limit=100 --geocode_provider="google_maps"
+```
 
 TODO
 ====
