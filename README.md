@@ -52,6 +52,9 @@ class AppKernel extends Kernel
 
 Usage
 =====
+// @TODO
+// Give example of auto-updating via doctrine event subscriber
+// Give example of leveraging interface in class
 
 TODO
 ====
