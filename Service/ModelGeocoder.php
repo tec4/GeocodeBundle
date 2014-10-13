@@ -71,6 +71,7 @@ class ModelGeocoder
      */
     private function addCoordinates(GeocodeableInterface $model, ResultInterface $result = null)
     {
+        $name = $model->getGeocodeableName();
         if ($result instanceof ResultInterface) {
             $lat = $result->getLatitude();
             $lng = $result->getLongitude();
