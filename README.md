@@ -98,7 +98,7 @@ class NewClass implements GeocodeableInterface
 Usage
 =====
 
-Auto-update entities when certain fields change (ex: when an address changes)
+Auto-update entities when certain fields change or if entity has yet to be geocoded 
 -----------------------------------------------------------------------------
 
 For more info read symfony's docs about [registering event listeners and subscribers](http://symfony.com/doc/current/cookbook/doctrine/event_listeners_subscribers.html)
