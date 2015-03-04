@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Geocoder\Exception\QuotaExceededException;
 
 /**
  * Get latitude/longitude coordinates for any entity 
@@ -45,6 +46,12 @@ class GeocodeCommand extends ContainerAwareCommand
                 InputOption::VALUE_OPTIONAL, 
                 'Name of willdurand/geocoder-bundle geocoder to use. See willdurand/geocoder-bundle docs for available types.'
             )
+            ->addOption(
+                'search_previously_attempted', 
+                null,
+                InputOption::VALUE_OPTIONAL, 
+                'Whether you want to try to re-geocode results that there was no value for previously'
+            )
         ;
     }
 
@@ -64,8 +71,19 @@ class GeocodeCommand extends ContainerAwareCommand
             throw new \Exception('Class must implement GeocodeableInterface');
         }
 
+        // Search all that have not been geocoded by default
+        $searchOptions = array(
+            'geocoded' => false,
+            'geocodeAttempted' => false,
+        );
+
+        // Search only those that have not been geocoded and
+        // those that we tried to do previously (aka - attempt re-geocode)
+        if ($input->getOption('search_previously_attempted')) {
+            $searchOptions['geocodeAttempted'] = true;
+        }
         $entities = $em->getRepository($class)->findBy(
-            array('geocoded' => false),
+            $searchOptions,
             $orderBy = null,
             $limit
         );
@@ -78,20 +96,25 @@ class GeocodeCommand extends ContainerAwareCommand
         $output->writeln('Begining geocode');
         $modelGeocoder = $container->get('tec4_geocode.model_geocoder');
 
-        $i = 0;
+        // @todo batch results
         foreach ($entities as $entity) {
-            if ($modelGeocoder->updateModel($entity, $geocoder, true)) {
-                $i++;
-                $em->persist($entity);
-                if (($i % 30) == 0) {
-                    $em->flush();
+            try {
+                if ($modelGeocoder->updateModel($entity, $geocoder, true)) {
+                    $em->persist($entity);
                 }
+            } catch (QuotaExceededException $e) {
+
+                $output->writeln("Quota Exceeded. Stopping execution of script."); 
+                break;
+
+            } catch (\Exception $e) {
+                // @todo better handle different types of exceptions and
+                //       stop execution if needed
             }
             // Hitting API too fast causes errors with many geocoding services
             sleep(1);
+            $em->flush();
         }
-        $em->flush();
-        $em->clear();
         $output->writeln('Done');
     }
 }

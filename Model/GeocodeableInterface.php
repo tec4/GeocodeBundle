@@ -54,6 +54,21 @@ interface GeocodeableInterface
     public function isGeocoded();
 
     /**
+     * Set true if entity was attempted to be geocoded, but failed
+     *
+     * @param boolean
+     * @return self
+     */
+    public function setGeocodeAttempted($geocodeAttempted);
+
+    /**
+     * Has entity attempted to be geocoded
+     *
+     * @return boolean
+     */
+    public function isGeocodeAttempted();
+
+    /**
      * Get string to geocode (ex: address, city/state name, etc)
      *
      * @return float 

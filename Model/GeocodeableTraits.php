@@ -36,6 +36,13 @@ trait GeocodeableTraits
     protected $geocoded = false;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="geocode_attempted", type="boolean")
+     */
+    protected $geocodeAttempted = false;
+
+    /**
      * Set latitude
      *
      * @param decimal $latitude
@@ -105,6 +112,29 @@ trait GeocodeableTraits
     }
 
     /**
+     * Was object attempted to be geocoded previously?
+     *
+     * @return boolean
+     **/
+    public function isGeocodeAttempted()
+    {
+        return $this->geocodeAttempted;
+    }
+
+    /**
+     * Flag property has having been attempted to be geocoded
+     *
+     * @param boolean $geocodeAttempted
+     * @return self
+     */
+    public function setGeocodeAttempted($geocodeAttempted)
+    {
+        $this->geocodeAttempted = $geocodeAttempted;
+
+        return $this;
+    }
+
+    /**
      * Set latitude/longitude and flag entity as geocoded
      *
      * @param decimal $latitude
@@ -116,6 +146,7 @@ trait GeocodeableTraits
         $this->setLongitude($longitude);
         $this->setLatitude($latitude);
         $this->setGeocoded(true);
+        $this->setGeocodeAttempted(true);
 
         return $this;
     }

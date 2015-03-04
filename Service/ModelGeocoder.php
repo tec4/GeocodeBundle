@@ -5,6 +5,7 @@ namespace Tec4\GeocodeBundle\Service;
 use Geocoder\Geocoder;
 use Geocoder\Result\ResultInterface;
 use Monolog\Logger;
+use Geocoder\Exception\NoResultException;
 use Tec4\GeocodeBundle\Model\GeocodeableInterface;
 
 /**
@@ -45,6 +46,9 @@ class ModelGeocoder
         // in the calling code
         try {
             $result = $geocoder->geocode($name);
+        } catch (NoResultException $e) {
+            // Indicate that geocode was attempted and no result found
+            $model->setGeocodeAttempted(true);
         } catch (\Exception $e) {
             $this->logger->error(
                 $this->buildBaseErrorMessage($name) .
