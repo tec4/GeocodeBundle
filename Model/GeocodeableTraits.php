@@ -135,7 +135,7 @@ trait GeocodeableTraits
     }
 
     /**
-     * Set latitude/longitude and flag entity as geocoded
+     * Set latitude/longitude 
      *
      * @param decimal $latitude
      * @param decimal $longitude
@@ -145,8 +145,6 @@ trait GeocodeableTraits
     {
         $this->setLongitude($longitude);
         $this->setLatitude($latitude);
-        $this->setGeocoded(true);
-        $this->setGeocodeAttempted(true);
 
         return $this;
     }

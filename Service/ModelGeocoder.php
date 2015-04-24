@@ -84,6 +84,8 @@ class ModelGeocoder
 
             // Set coordinates if found.
             if ($lat !== 0 && $lng !== 0) {
+                $model->setGeocoded(true);
+                $model->setGeocodeAttempted(true);
                 $model->setCoordinates($lat, $lng);
                 $this->logger->info('Geocoded: ' . $name);
                 $this->logger->info('Latitude: ' . $lat);
