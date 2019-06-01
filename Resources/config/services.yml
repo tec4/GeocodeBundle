@@ -1,5 +1,5 @@
 services:
     tec4_geocode.model_geocoder:
         class: Tec4\GeocodeBundle\Service\ModelGeocoder
-        arguments: [ @logger ]
+        arguments: [ "@logger" ]
 
